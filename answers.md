@@ -90,7 +90,44 @@ a move, and returns the game after that move? Does it change the game it gets,
 or return a new one? Why does it matter that your page and your server use the
 same pure functions?
 
-**Answer:**
+**Answer:** **Ways a game can end in `no-center`:**
+
+1. **X Wins:** Player X achieves 3-in-a-row in an unblocked line: Row 0
+   (`[0, 1, 2]`), Row 2 (`[6, 7, 8]`), Column 0 (`[0, 3, 6]`), or Column 2
+   (`[2, 5, 8]`).
+2. **O Wins:** Player O achieves 3-in-a-row in any of the unblocked lines listed
+   above.
+3. **Draw:** All 8 valid playable cells (`0, 1, 2, 3, 5, 6, 7, 8`) are occupied,
+   and neither player has achieved 3-in-a-row. _(Note: Because center cell 4 is
+   unplayable, lines passing through the center—Row 1 `[3, 4, 5]`, Column 1
+   `[1, 4, 7]`, and both diagonals `[0, 4, 8]` and `[2, 4, 6]`—can never be
+   completed)._
+
+**Ways a move can be wrong:**
+
+1. **Playing the center cell:** Attempting to play cell 4, which is prohibited
+   in the `no-center` variant.
+2. **Playing an occupied cell:** Selecting any cell that already has an 'X' or
+   'O'.
+3. **Out-of-bounds index:** Submitting a number outside `0..8` or a non-integer.
+4. **Move after game over:** Attempting to make a move when the game has already
+   concluded (won or drawn).
+5. **Playing out of turn:** Attempting to move twice in a row for the same
+   symbol (turns must strictly alternate starting with X).
+
+**Pure function details:**
+
+- `applyMove(state, cellIndex)` in `shared/game/index.ts` takes the current game
+  state and a target cell index, returning `{ ok: true, state: nextState }` or
+  `{ ok: false, error: string }`.
+- It does **not** mutate the game it receives; it creates a shallow copy of the
+  board and returns a brand-new immutable `GameState` object.
+- **Why using the same pure functions matters:** It establishes a single source
+  of truth for the game mechanics across the client and server. The browser
+  delivers immediate UI feedback according to the rules, while the server uses
+  the exact same functions via `replayMoves` to independently and
+  authoritatively verify that the game reached a genuine terminal state without
+  trusting the client's claimed result.
 
 ## 3. Cheating
 
@@ -100,7 +137,20 @@ you "won" in 2 moves. Screenshot what your server answers.
 Why does the server check the moves itself, if your own page always sends
 correct games? Which status code did your server answer, and why that one?
 
-**Answer:**
+**Answer:** ![Cheating test](screenshots/q3-cheating.png)
+
+**Why the server checks the moves itself:** The server can never trust the
+browser. Anyone can open DevTools or use `curl` to send arbitrary HTTP requests
+directly to `/api/games`, bypassing the React UI entirely. If the server trusted
+the client or only recorded whatever outcome the client claimed, a malicious
+user could write false wins, impossible moves, or corrupted data directly into
+the database.
+
+**Status code answered:** The server answers with `400 Bad Request` (with
+`{ error: { code: "invalid_game", message: "..." } }` or
+`{ code: "validation_error" }`). `400` is the standard HTTP status code for
+client errors where the request payload is semantically or structurally invalid,
+distinguishing client-side illegal inputs from server malfunctions (`500`).
 
 ## 4. Someone else's games
 
@@ -111,7 +161,24 @@ answered.
 How does your server know whose games to send? Which line in your code makes
 sure B never gets A's games, and what would B see without it?
 
-**Answer:**
+**Answer:** ![User B games](screenshots/q4-user-b.png)
+
+**How the server knows whose games to send:** Every request to `/api/games`
+passes through `requireAuth` middleware (`server/middleware/auth.ts`), which
+cryptographically verifies the Supabase access token in the
+`Authorization: Bearer` header. It attaches the user's verified identity to
+context as `c.get("user")`.
+
+**Line that ensures isolation:** In `server/routes/games.ts`:
+
+```ts
+.eq("owner_id", c.get("user").id)
+```
+
+**What B would see without it:** Without the `.eq("owner_id", ...)` filter, the
+query would execute a table scan returning all rows in `public.games`, meaning
+User B would see all games played and saved by User A (and every other user in
+the system).
 
 ## 5. When NASA fails
 
