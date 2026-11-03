@@ -33,6 +33,7 @@ export function Layout() {
         <nav className={styles.nav}>
           <Link to="/">Home</Link>
           <Link to="/tic-tac-toe">Tic-Tac-Toe</Link>
+          <Link to="/nasa">NASA Pictures</Link>
           <a href={COURSE_GITHUB} target="_blank" rel="noreferrer">
             GitHub
           </a>
