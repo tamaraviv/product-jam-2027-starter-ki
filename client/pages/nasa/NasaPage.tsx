@@ -4,7 +4,7 @@ import { Button, Card, Spinner } from "../../components";
 import { useExplainPicture, useNasaPictures } from "../../features/nasa/hooks";
 import styles from "./NasaPage.module.css";
 
-const COUNT = 10;
+const COUNT = 20;
 
 function ApodItemCard({
   item,
@@ -108,10 +108,12 @@ export default function NasaPage() {
     data: pictures,
     isLoading,
     error,
-    refetch,
     isFetching,
+    seed,
+    shuffle,
   } = useNasaPictures(COUNT);
-  const explain = useExplainPicture(COUNT);
+
+  const explain = useExplainPicture(COUNT, seed);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
 
@@ -150,7 +152,7 @@ export default function NasaPage() {
           variant="secondary"
           size="sm"
           loading={isFetching}
-          onClick={() => void refetch()}
+          onClick={shuffle}
         >
           Shuffle Pictures
         </Button>
@@ -171,7 +173,7 @@ export default function NasaPage() {
               ? error.message
               : "NASA service could not be reached."}
           </p>
-          <Button variant="primary" onClick={() => void refetch()}>
+          <Button variant="primary" onClick={shuffle}>
             Try Again
           </Button>
         </Card>
