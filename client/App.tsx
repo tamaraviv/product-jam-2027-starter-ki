@@ -1,7 +1,7 @@
 import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Spinner, ToastProvider, TooltipProvider } from "./components";
 import { AuthProvider, RequireAuth } from "./lib/auth";
 import { DIRECTION, SHOW_DEMOS } from "./lib/config";
@@ -76,7 +76,11 @@ export function App() {
                     client/pages/Layout.tsx. */}
                     <Route element={<Layout />}>
                       <Route path="/" element={<HomePage />} />
-                      <Route path="/design" element={<DesignPage />} />
+                      <Route path="/cat-ch" element={<DesignPage />} />
+                      <Route
+                        path="/design"
+                        element={<Navigate to="/cat-ch" replace />}
+                      />
 
                       {/* Everything in here needs a login. */}
                       <Route element={<RequireAuth />}>
