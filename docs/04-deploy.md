@@ -76,14 +76,14 @@ Nothing is wrong. Do not redeploy, do not rename the app. Make a cup of tea and
 try again. (You can confirm the app itself is fine meanwhile by visiting the
 same address with `http://` instead of `https://`.)
 
-## Give the server its secret
+## Give the server its secrets
 
 **This is the step people forget, and it is the one that makes a working app
 return errors in production.**
 
 The build variables above only exist while the app is being built - they are
-baked into the browser code. The server needs its own values while it is
-running, and there is exactly one you have to type:
+baked into the browser code. The server needs its private keys while it is
+running. Add all three as secrets:
 
 In your Worker: **Settings** → **Variables & Secrets** → **Add**. Set the type
 to **Secret**:
@@ -91,6 +91,8 @@ to **Secret**:
 | Name                  | Type   | Value                                           |
 | --------------------- | ------ | ----------------------------------------------- |
 | `SUPABASE_SECRET_KEY` | Secret | the `SUPABASE_SECRET_KEY` line from your `.env` |
+| `NASA_API_KEY`        | Secret | the `NASA_API_KEY` line from your `.env`        |
+| `GEMINI_API_KEY`      | Secret | the `GEMINI_API_KEY` line from your `.env`      |
 
 > **Secret, not Text.** Every deploy clears out Text variables that are not
 > written in `wrangler.jsonc`, so a Text value works once and vanishes on your

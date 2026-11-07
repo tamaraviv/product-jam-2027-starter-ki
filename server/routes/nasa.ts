@@ -13,7 +13,7 @@ export const nasa = new Hono<AppEnv>()
   .get("/apod", async (c) => {
     const rawCount = c.req.query("count");
     const count = Math.min(
-      Math.max(parseInt(rawCount ?? "10", 10) || 10, 1),
+      Math.max(parseInt(rawCount ?? "20", 10) || 20, 1),
       20,
     );
 
@@ -30,6 +30,7 @@ export const nasa = new Hono<AppEnv>()
     try {
       nasaResponse = await fetch(
         `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(c.env.NASA_API_KEY)}&count=${count}`,
+        { cache: "no-store" },
       );
     } catch (err) {
       console.error("NASA APOD network error:", err);
@@ -42,16 +43,17 @@ export const nasa = new Hono<AppEnv>()
     }
 
     if (!nasaResponse.ok) {
+      const nasaErrText = await nasaResponse.text();
       console.error(
         "NASA APOD response error:",
         nasaResponse.status,
-        await nasaResponse.text(),
+        nasaErrText,
       );
       return fail(
         c,
         502,
         "nasa_error",
-        "NASA's service returned an error. Please try again later.",
+        `NASA returned ${nasaResponse.status}: ${nasaErrText.slice(0, 200)}`,
       );
     }
 
@@ -80,6 +82,26 @@ export const nasa = new Hono<AppEnv>()
       ? rawData
       : [rawData as RawApodItem];
 
+    if (
+      items.length > 1 &&
+      new Set(
+        items.map((item) =>
+          JSON.stringify([item.title, item.explanation, item.url]),
+        ),
+      ).size === 1
+    ) {
+      console.error(
+        "NASA APOD returned repeated picture content:",
+        items.length,
+      );
+      return fail(
+        c,
+        502,
+        "nasa_repeated_content",
+        "NASA returned the same picture and description for every result. Please try again later.",
+      );
+    }
+
     // Query database cache for existing Hebrew translations
     const dates = items.map((item) => item.date).filter(Boolean);
     const supabase = createAdminClient(c.env);
@@ -95,7 +117,17 @@ export const nasa = new Hono<AppEnv>()
         .select("date, hebrew_title, hebrew_summary, tags")
         .in("date", dates);
 
-      if (!dbError && cachedRows) {
+      if (dbError) {
+        console.error("Failed to load cached NASA explanations:", dbError);
+        return fail(
+          c,
+          500,
+          "database_error",
+          "Could not load saved Hebrew explanations.",
+        );
+      }
+
+      if (cachedRows) {
         cachedMap = new Map(
           cachedRows.map((row) => [
             row.date,
@@ -119,7 +151,7 @@ export const nasa = new Hono<AppEnv>()
       hebrew: cachedMap.get(item.date) ?? null,
     }));
 
-    return c.json(result);
+    return c.json(result, 200, { "Cache-Control": "no-store" });
   })
 
   // POST /api/nasa/explain - translates and explains an APOD picture in Hebrew
@@ -144,7 +176,20 @@ export const nasa = new Hono<AppEnv>()
       .eq("date", date)
       .maybeSingle();
 
-    if (!cacheLookupError && cached) {
+    if (cacheLookupError) {
+      console.error(
+        "Failed to check cached NASA explanation:",
+        cacheLookupError,
+      );
+      return fail(
+        c,
+        500,
+        "database_error",
+        "Could not check for a saved Hebrew explanation.",
+      );
+    }
+
+    if (cached) {
       return c.json({
         date: cached.date,
         hebrew_title: cached.hebrew_title,
@@ -159,6 +204,7 @@ export const nasa = new Hono<AppEnv>()
     try {
       nasaRes = await fetch(
         `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(c.env.NASA_API_KEY)}&date=${encodeURIComponent(date)}`,
+        { cache: "no-store" },
       );
     } catch (err) {
       console.error("NASA APOD date fetch error:", err);
@@ -220,8 +266,8 @@ Picture Explanation: ${englishExplanation}`;
         },
       ],
       generationConfig: {
-        response_mime_type: "application/json",
-        response_schema: {
+        responseMimeType: "application/json",
+        responseSchema: {
           type: "OBJECT",
           properties: {
             hebrewTitle: { type: "STRING" },
@@ -241,8 +287,9 @@ Picture Explanation: ${englishExplanation}`;
 
     let geminiRes: Response;
     try {
+      // Use Google's current stable Flash model for structured text output.
       geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(c.env.GEMINI_API_KEY)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(c.env.GEMINI_API_KEY)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -266,7 +313,7 @@ Picture Explanation: ${englishExplanation}`;
         c,
         502,
         "gemini_error",
-        "Gemini AI service returned an error. Please try again.",
+        `Gemini returned HTTP ${geminiRes.status}. Check the server configuration and logs.`,
       );
     }
 
@@ -341,7 +388,12 @@ Picture Explanation: ${englishExplanation}`;
 
     if (insertError) {
       console.error("Failed to cache NASA picture in database:", insertError);
-      // Non-fatal for the user response, but log it
+      return fail(
+        c,
+        500,
+        "database_error",
+        "The explanation was generated but could not be saved.",
+      );
     }
 
     return c.json({
@@ -352,4 +404,3 @@ Picture Explanation: ${englishExplanation}`;
       cached: false,
     });
   });
-
