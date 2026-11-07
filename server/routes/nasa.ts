@@ -285,19 +285,39 @@ Picture Explanation: ${englishExplanation}`;
       },
     };
 
-    let geminiRes: Response;
-    try {
-      // Use Google's current stable Flash model for structured text output.
-      geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(c.env.GEMINI_API_KEY)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(geminiBody),
-        },
-      );
-    } catch (err) {
-      console.error("Gemini network error:", err);
+    let geminiRes: Response | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        // Use Google's current stable Flash model for structured text output.
+        geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(c.env.GEMINI_API_KEY)}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(geminiBody),
+          },
+        );
+      } catch (err) {
+        console.error("Gemini network error:", err);
+        return fail(
+          c,
+          502,
+          "gemini_unavailable",
+          "Could not reach Gemini AI service.",
+        );
+      }
+
+      const retryable =
+        geminiRes.status === 408 ||
+        geminiRes.status === 429 ||
+        geminiRes.status >= 500;
+      if (!retryable || attempt === 2) break;
+
+      const backoffMs = 1000 * 2 ** attempt + Math.random() * 250;
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    }
+
+    if (!geminiRes) {
       return fail(
         c,
         502,
@@ -309,12 +329,11 @@ Picture Explanation: ${englishExplanation}`;
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
       console.error("Gemini API error:", geminiRes.status, errText);
-      return fail(
-        c,
-        502,
-        "gemini_error",
-        `Gemini returned HTTP ${geminiRes.status}. Check the server configuration and logs.`,
-      );
+      const message =
+        geminiRes.status === 503 || geminiRes.status === 429
+          ? "Gemini is temporarily busy. Please try again in a moment."
+          : `Gemini returned HTTP ${geminiRes.status}. Check the server logs for details.`;
+      return fail(c, 502, "gemini_error", message);
     }
 
     let geminiRaw: {
