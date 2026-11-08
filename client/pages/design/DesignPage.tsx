@@ -52,14 +52,9 @@ function SectionHeading({
         <span className={styles.sectionRule} />
         <strong>{label}</strong>
       </div>
-      <img
-        className={styles.sectionTitle}
-        src={`/design/headings/section-${number}.png`}
-        alt={title}
-        role="heading"
-        aria-level={2}
-        data-section={number}
-      />
+      <h2 className={styles.sectionTitle} data-section={number}>
+        {title}
+      </h2>
     </>
   );
 }
@@ -86,21 +81,12 @@ function Hero() {
           </div>
         ))}
       </div>
-      <img
-        className={styles.heroLogo}
-        src="/design/hero-logo.png"
-        alt="CAT-CH"
-      />
-      <img
-        className={styles.heroTitle}
-        src="/design/hero-title.png"
-        alt="טינדר לחתולי רחוב"
-      />
-      <img
-        className={styles.heroActions}
-        src="/design/hero-actions.png"
-        alt="שמאלה · מעבירים; ימינה · לוקחים"
-      />
+      <h1 className={styles.heroLogo}>CAT-CH</h1>
+      <p className={styles.heroTitle}>טינדר לחתולי רחוב</p>
+      <div className={styles.heroActions}>
+        <span className={styles.heroActionPass}>שמאלה · מעבירים</span>
+        <span className={styles.heroActionAdopt}>ימינה · לוקחים</span>
+      </div>
     </header>
   );
 }
@@ -357,22 +343,12 @@ function DesignLanguage() {
       <h3 className={styles.subheading}>הטיפוגרפיה</h3>
       <div className={styles.typeSamples}>
         <div>
-          <img
-            className={styles.typeSampleGlyph}
-            src="/design/glyph-hebrew.png"
-            alt=""
-            aria-hidden="true"
-          />
+          <strong className={styles.hebrewGlyph}>אב</strong>
           <strong>NarkisBlockMF</strong>
           <span>עברית</span>
         </div>
         <div>
-          <img
-            className={styles.typeSampleGlyph}
-            src="/design/glyph-latin.png"
-            alt=""
-            aria-hidden="true"
-          />
+          <strong className={styles.latinGlyph}>Aa</strong>
           <strong>Narkiss Block</strong>
           <span>משק ונספרים</span>
         </div>
@@ -451,21 +427,9 @@ function DesignLanguage() {
 function Closing() {
   return (
     <footer className={styles.closing}>
-      <img
-        className={styles.closingLogo}
-        src="/design/closing-logo.png"
-        alt="CAT-CH"
-      />
-      <img
-        className={styles.closingLightLine}
-        src="/design/closing-light-line.png"
-        alt="השכונה בשליטה."
-      />
-      <img
-        className={styles.closingDarkLine}
-        src="/design/closing-dark-line.png"
-        alt="החתולים מרוצים."
-      />
+      <h2 className={styles.closingLogo}>CAT-CH</h2>
+      <p className={styles.closingLightLine}>השכונה בשליטה.</p>
+      <p className={styles.closingDarkLine}>החתולים מרוצים.</p>
       <img
         className={styles.closingCat}
         src="/design/closing-cat.png"
