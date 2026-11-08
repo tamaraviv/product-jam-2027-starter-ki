@@ -81,7 +81,9 @@ function Hero() {
           </div>
         ))}
       </div>
-      <h1 className={styles.heroLogo}>CAT-CH</h1>
+      <h1 className={styles.heroLogo}>
+        <img src="/design/hero-logo.png" alt="CAT-CH" />
+      </h1>
       <p className={styles.heroTitle}>טינדר לחתולי רחוב</p>
       <div className={styles.heroActions}>
         <span className={styles.heroActionPass}>שמאלה · מעבירים</span>
@@ -124,7 +126,11 @@ function BackgroundSection() {
       </p>
       <div className={styles.goal}>
         <span className={styles.eyebrow}>המטרה</span>
-        <h3>להפוך רצון טוב לשגרה משותפת.</h3>
+        <h3>
+          להפוך רצון טוב לשגרה
+          <br />
+          משותפת.
+        </h3>
         <p>
           השגרה של כל חתול מתחלקת למשימות קטנות, שכל שכן יכול לקחת כשנוח לו.
         </p>
@@ -182,9 +188,19 @@ function CatCard() {
         <span>אוהב ליטופים</span>
       </div>
       <div className={styles.profileActions}>
-        <span className={styles.adoptAction}>✓</span>
-        <span className={styles.urgentAction}>ϟ</span>
-        <span className={styles.passAction}>×</span>
+        <span className={styles.adoptAction}>
+          <img src="/design/icons/action-adopt.png" alt="" aria-hidden="true" />
+        </span>
+        <span className={styles.urgentAction}>
+          <img
+            src="/design/icons/action-urgent.png"
+            alt=""
+            aria-hidden="true"
+          />
+        </span>
+        <span className={styles.passAction}>
+          <img src="/design/icons/action-pass.png" alt="" aria-hidden="true" />
+        </span>
       </div>
       <div className={styles.profileActionLabels}>
         <span>אני על זה</span>
@@ -258,7 +274,7 @@ function ContentSection() {
 function DailyLife() {
   const schedule = [
     ["07:00", "ארוחת בוקר", "לקחה: נועה", "בוצע"],
-    ["12:00", "מים טריים", "לקח: רון", "נותר · 24:10"],
+    ["12:00", "מים טריים", "לקח: רון", "נעול · 24:10"],
     ["18:00", "ארוחת ערב", "מחכה לשכן", "פתוח"],
     ["21:00", "בדיקת לילה", "מחכה לשכן", "פתוח"],
   ];
