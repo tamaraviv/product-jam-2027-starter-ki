@@ -1,3 +1,75 @@
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Hairline.0fc7f41fdc5ed560775f0e8bc0134d3b.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Thin.717ccdd2fa02b498b9881d1b99f036b4.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Extralight.6317c97a4f8bda0ac41fd4ddc4d1903a.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Regular.0d12876d0dc50c49dba2d19c34a042c2.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Medium.fb6f0a2071b8efabf08501b12f30b13c.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Bold.3fee73ab53cadadd6d9c5ea0980c06ed.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Heavy.9905f43b5c4e0c1b40d7362b8ad8fd9b.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Narkiss Block";
+  src: url("../../../fonts/NarkissBlock-Black.b0dbe0ae4585b1f25b47f566204b008d.otf")
+    format("opentype");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :global(html:has(main[data-design-page])) {
   overflow-x: clip;
 }
@@ -16,8 +88,12 @@
   padding: 0;
   color: #17191e;
   background: #fff;
-  font-family: var(--font-titles);
+  font-family: "Narkiss Block", var(--font-body);
   overscroll-behavior: auto;
+}
+
+.page :is(h1, h2, h3, h4, h5, h6) {
+  font-family: inherit;
 }
 
 .canvas {
@@ -101,8 +177,13 @@
   position: absolute;
   top: 43.7cqw;
   left: 50%;
-  width: 68.5cqw;
-  height: auto;
+  width: 100%;
+  margin: 0;
+  color: #fd2f79;
+  font-size: 19cqw;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
   transform: translateX(-50%);
 }
 
@@ -110,8 +191,12 @@
   position: absolute;
   top: 64cqw;
   left: 50%;
-  width: 61cqw;
-  height: auto;
+  width: 100%;
+  margin: 0;
+  color: #fd2f79;
+  font-size: 7.3cqw;
+  font-weight: 700;
+  line-height: 1.2;
   transform: translateX(-50%);
 }
 
@@ -119,11 +204,32 @@
   position: absolute;
   top: 81.7cqw;
   left: 50%;
-  display: block;
+  display: flex;
   width: 60.3cqw;
-  height: 8.7cqw;
-  max-width: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;
+  direction: ltr;
   transform: translateX(-50%);
+}
+
+.heroActions span {
+  padding: 1.5cqw 3.2cqw;
+  border-radius: 999px;
+  font-size: 3.4cqw;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.heroActionPass {
+  background: #fff;
+  color: #17191e;
+}
+
+.heroActionAdopt {
+  background: #fd2f79;
+  color: #fff;
 }
 
 .heroAvatar img {
@@ -176,45 +282,14 @@
 }
 
 .sectionTitle {
-  display: block;
-  height: auto;
-  margin-inline-start: 0;
-  margin-inline-end: auto;
-}
-
-.sectionTitle[data-section="01"] {
-  width: 54.3cqw;
-  background-color: #16181d;
-  mask: url("/design/headings/section-01.png") center / contain no-repeat;
-  aspect-ratio: 380 / 70;
-}
-
-.sectionTitle[data-section="02"] {
-  width: 71.4cqw;
-  background-color: #16181d;
-  mask: url("/design/headings/section-02.png") center / contain no-repeat;
-  aspect-ratio: 500 / 110;
-}
-
-.sectionTitle[data-section="03"] {
-  width: 64.3cqw;
-  background-color: #16181d;
-  mask: url("/design/headings/section-03.png") center / contain no-repeat;
-  aspect-ratio: 450 / 110;
-}
-
-.sectionTitle[data-section="04"] {
-  width: 50cqw;
-  background-color: #16181d;
-  mask: url("/design/headings/section-04.png") center / contain no-repeat;
-  aspect-ratio: 350 / 130;
-}
-
-.sectionTitle[data-section="05"] {
-  width: 60cqw;
-  background-color: #16181d;
-  mask: url("/design/headings/section-05.png") center / contain no-repeat;
-  aspect-ratio: 420 / 120;
+  width: 100%;
+  margin: 5.2cqw 0 3cqw;
+  color: #16181d;
+  font-size: 9.2cqw;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: right;
+  text-wrap: balance;
 }
 
 .lead {
@@ -988,6 +1063,7 @@
   display: flex;
   min-height: 31cqw;
   flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
   gap: 1.2cqw;
   padding: 3.5cqw;
@@ -999,11 +1075,16 @@
   font-size: 3.5cqw;
 }
 
-.typeSampleGlyph {
-  display: block;
-  width: 16cqw;
-  height: auto;
-  align-self: flex-start;
+.typeSamples .latinGlyph {
+  font-size: 16cqw;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.typeSamples .hebrewGlyph {
+  font-size: 11cqw;
+  font-weight: 900;
+  line-height: 1.1;
 }
 
 .typeSamples span {
@@ -1239,6 +1320,12 @@
   top: 11.5cqw;
   left: 50%;
   width: 48.6cqw;
+  margin: 0;
+  color: #fd2f79;
+  font-size: 13cqw;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
   transform: translateX(-50%);
 }
 
@@ -1246,6 +1333,12 @@
   top: 28cqw;
   left: 50%;
   width: 63cqw;
+  margin: 0;
+  color: #fff;
+  font-size: 6.6cqw;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
   transform: translateX(-50%);
 }
 
@@ -1253,6 +1346,12 @@
   top: 40.1cqw;
   left: 50%;
   width: 63cqw;
+  margin: 0;
+  color: #17191e;
+  font-size: 6.6cqw;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
   transform: translateX(-50%);
 }
 
