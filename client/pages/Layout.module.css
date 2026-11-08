@@ -10,6 +10,9 @@
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -39,6 +42,16 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-4);
+}
+
+.menuToggle,
+.menuBackdrop {
+  display: none;
+}
+
+.menuToggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-header-text);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .footer {
@@ -83,8 +96,8 @@
 
 @media (max-width: 520px) {
   .header {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
   }
@@ -93,17 +106,78 @@
     font-size: var(--text-xl);
   }
 
-  .nav {
-    width: 100%;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: var(--space-2);
-    font-size: var(--text-sm);
+  .menuToggle {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    margin-inline-start: auto;
+    padding: var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
   }
 
-  .nav a:nth-child(1),
-  .nav a:nth-child(2),
-  .nav a:nth-child(6) {
+  .menuToggle:hover {
+    background: rgb(255 255 255 / 12%);
+  }
+
+  .menuToggle svg {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+
+  .menuBackdrop {
+    position: fixed;
+    z-index: 1;
+    display: block;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgb(0 0 0 / 35%);
+  }
+
+  .nav {
+    position: absolute;
+    z-index: 2;
+    top: 100%;
+    right: var(--space-4);
     display: none;
+    width: min(80vw, 20rem);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--space-2);
+    border: 1px solid rgb(255 255 255 / 14%);
+    border-radius: var(--radius-md);
+    background: var(--color-header-bg);
+    box-shadow: var(--shadow-lg);
+    font-size: var(--text-base);
+  }
+
+  .navOpen {
+    display: flex;
+  }
+
+  .appName {
+    position: relative;
+    z-index: 2;
+  }
+
+  .nav a {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    text-align: right;
+  }
+
+  .nav a:hover {
+    background: rgb(255 255 255 / 12%);
+    text-decoration: none;
   }
 }

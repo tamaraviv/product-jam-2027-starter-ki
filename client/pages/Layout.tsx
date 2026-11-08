@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Link, Outlet } from "react-router";
 import { Spinner } from "../components";
 import { useAuth } from "../lib/auth";
@@ -24,21 +24,82 @@ import styles from "./Layout.module.css";
  * https://reactrouter.com/start/declarative/routing#layout-routes
  */
 export function Layout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
         <Link to="/" className={styles.appName}>
           {APP_NAME}
         </Link>
-        <nav className={styles.nav}>
-          <Link to="/">Home</Link>
-          <Link to="/tic-tac-toe">Tic-Tac-Toe</Link>
-          <Link to="/nasa">NASA Pictures</Link>
-          <Link to="/cat-ch">CAT-CH</Link>
-          <a href={COURSE_GITHUB} target="_blank" rel="noreferrer">
+        <button
+          type="button"
+          className={styles.menuToggle}
+          aria-label={
+            menuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
+          aria-expanded={menuOpen}
+          aria-controls="site-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M3 6h18M3 12h18M3 18h18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+        {menuOpen ? (
+          <button
+            type="button"
+            className={styles.menuBackdrop}
+            aria-label="Close navigation menu"
+            onClick={() => setMenuOpen(false)}
+          />
+        ) : null}
+        <nav
+          className={`${styles.nav} ${menuOpen ? styles.navOpen : ""}`}
+          id="site-navigation"
+          aria-label="Main navigation"
+        >
+          <Link to="/" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
+          <Link to="/tic-tac-toe" onClick={() => setMenuOpen(false)}>
+            Tic-Tac-Toe
+          </Link>
+          <Link to="/nasa" onClick={() => setMenuOpen(false)}>
+            NASA Pictures
+          </Link>
+          <Link to="/cat-ch" onClick={() => setMenuOpen(false)}>
+            CAT-CH
+          </Link>
+          <a
+            href={COURSE_GITHUB}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => setMenuOpen(false)}
+          >
             GitHub
           </a>
-          {SHOW_DEMOS ? <Link to="/demos">Demos</Link> : null}
+          {SHOW_DEMOS ? (
+            <Link to="/demos" onClick={() => setMenuOpen(false)}>
+              Demos
+            </Link>
+          ) : null}
         </nav>
       </header>
 
