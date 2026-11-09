@@ -253,12 +253,18 @@ function ContentSection() {
         ))}
       </div>
       <div className={styles.mapArea}>
+        <img
+          className={styles.mapBackdrop}
+          src="/design/map-illustration.svg"
+          alt=""
+          aria-hidden="true"
+        />
         <div className={styles.mapCats} aria-label="מפת חתולי השכונה">
           {["shoko", "mitzi", "pita", "baxi", "gingi", "mocha", "shoko2"].map(
             (kind, index) => (
               <div className={styles.mapCat} data-index={index} key={kind}>
                 <CatIllustration kind={kind as CatKind} />
-                {index > 4 ? <span>1</span> : null}
+                <span>{index === 2 ? "2" : "1"}</span>
               </div>
             ),
           )}
