@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="304" height="480" viewBox="0 0 304 480" fill="none">
+  <rect width="304" height="480" fill="#F4F5F8"/>
+  <path d="M88 -12V492M185 -12L306 476M-14 139H318M-14 337H318" stroke="#FFFFFF" stroke-width="16"/>
+  <path d="M147 187C164 187 181 198 183 215C186 234 171 255 152 258C132 261 111 246 110 226C109 205 126 188 147 187Z" fill="#CFF2E8"/>
+  <circle cx="156" cy="272" r="14" fill="#D6EAFB"/>
+  <circle cx="156" cy="272" r="6" fill="#72B6F0"/>
+  <g fill="#9A9DA7" font-family="Arial, sans-serif" font-size="9">
+    <text x="135" y="133">OLIVE ST.</text>
+    <text x="134" y="229">Garden</text>
+    <text x="117" y="331">FIG ST.</text>
+  </g>
+</svg>
