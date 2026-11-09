@@ -109,7 +109,7 @@ function BackgroundSection() {
           <div className={styles.statAvatar}>
             <CatIllustration kind="shoko" />
           </div>
-          <strong>0</strong>
+          <strong dir="ltr">0</strong>
         </article>
         <article className={`${styles.statCard} ${styles.statMitzi}`}>
           <span>
@@ -118,7 +118,7 @@ function BackgroundSection() {
           <div className={styles.statAvatar}>
             <CatIllustration kind="mitzi" />
           </div>
-          <strong>×3</strong>
+          <strong dir="ltr">×3</strong>
         </article>
       </div>
       <p className={styles.statCaption}>
@@ -334,7 +334,7 @@ function DesignLanguage() {
     { icon: "food", label: "אוכל" },
   ];
   return (
-    <section className={styles.section}>
+    <section className={`${styles.section} ${styles.designLanguage}`}>
       <SectionHeading number="05" label="איך זה נראה" title="שפה עיצובית" />
       <p className={styles.lead}>
         נקייה, מודרנית וקלילה, בהשראת טינדר. לבן כבסיס, כתום-קורל למותג, וקצת
@@ -356,20 +356,22 @@ function DesignLanguage() {
           </div>
         ))}
       </div>
-      <h3 className={styles.subheading}>הטיפוגרפיה</h3>
       <div className={styles.typeSamples}>
         <div>
           <strong className={styles.hebrewGlyph}>אב</strong>
-          <strong>NarkisBlockMF</strong>
-          <span>עברית</span>
+          <div className={styles.typeSampleMeta}>
+            <strong>NarkisBlockMF</strong>
+            <span>עברית</span>
+          </div>
         </div>
         <div>
           <strong className={styles.latinGlyph}>Aa</strong>
-          <strong>Narkiss Block</strong>
-          <span>משק ונספרים</span>
+          <div className={styles.typeSampleMeta}>
+            <strong>Narkiss Block</strong>
+            <span>ממשק ומספרים</span>
+          </div>
         </div>
       </div>
-      <h3 className={styles.subheading}>תמונה אמיתית, קשר אמיתי</h3>
       <div className={styles.photoCards}>
         <article>
           <img
@@ -387,10 +389,10 @@ function DesignLanguage() {
           <strong>אווטאר מאויר קטן</strong>
         </article>
       </div>
-      <h3 className={styles.subheading}>אייקונים</h3>
+      <h3 className={`${styles.subheading} ${styles.iconHeading}`}>אייקונים</h3>
       <div className={styles.iconSpec}>
         <div className={styles.pawGrid} aria-label="אייקון כף חתול">
-          <img src="/design/paw-icon.png" alt="" aria-hidden="true" />
+          <img src="/design/paw-icon.svg" alt="" aria-hidden="true" />
         </div>
         <dl>
           <div>
@@ -421,7 +423,9 @@ function DesignLanguage() {
           </div>
         ))}
       </div>
-      <h3 className={styles.subheading}>חתולי השכונה</h3>
+      <h3 className={`${styles.subheading} ${styles.catHeading}`}>
+        חתולי השכונה
+      </h3>
       <p className={styles.catIntro}>
         בסיס אחיד לכולם, כל אווטאר מעוצב לפי המראה האמיתי של החתול: פרווה,
         כתמים, צבע עיניים וחיתוך באוזן.
@@ -443,9 +447,15 @@ function DesignLanguage() {
 function Closing() {
   return (
     <footer className={styles.closing}>
-      <h2 className={styles.closingLogo}>CAT-CH</h2>
-      <p className={styles.closingLightLine}>השכונה בשליטה.</p>
-      <p className={styles.closingDarkLine}>החתולים מרוצים.</p>
+      <img
+        className={styles.closingLogo}
+        src="/design/closing-logo.png"
+        alt="CAT-CH"
+      />
+      <div className={styles.closingCopy}>
+        <p className={styles.closingLightLine}>השכונה בשליטה.</p>
+        <p className={styles.closingDarkLine}>החתולים מרוצים.</p>
+      </div>
       <img
         className={styles.closingCat}
         src="/design/closing-cat.png"
