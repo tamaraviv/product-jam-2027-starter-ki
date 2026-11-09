@@ -344,9 +344,10 @@
 
 .statCard strong {
   color: #fd2f79;
-  font-size: 10.5cqw;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10.2857cqw;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 .statAvatar {
@@ -1009,17 +1010,20 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 3.4286cqw;
   margin-bottom: 8cqw;
   direction: ltr;
 }
 
 .dayHeader > div:first-child {
+  position: relative;
+  top: 4px;
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
-  text-align: center;
+  gap: 0.5714cqw;
+  direction: rtl;
+  text-align: start;
 }
 
 .dayHeader p {
@@ -1065,7 +1069,7 @@
   column-gap: 2px;
   width: 100%;
   min-height: 15.5714cqw;
-  padding: 2.5cqw 3.5cqw;
+  padding: 2.5cqw 3.4286cqw;
   border-radius: 3.4cqw;
   background: #fff;
   color: #17191e;
@@ -1105,6 +1109,7 @@
 }
 
 .scheduleItem time {
+  justify-self: start;
   direction: ltr;
   color: #fd2f79;
   font-family: "Plus Jakarta Sans", sans-serif;
@@ -1172,8 +1177,18 @@
   color: #fff;
 }
 
+.designLanguage > .lead {
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 3.8571cqw;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
 .brandColor strong {
-  font-size: 4.2cqw;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 4.8571cqw;
+  font-weight: 900;
+  line-height: 1.4;
 }
 
 .brandColor code {
@@ -1189,11 +1204,14 @@
 
 .swatch {
   display: flex;
+  box-sizing: border-box;
+  height: 19.4286cqw;
   min-width: 0;
   flex-direction: column;
-  gap: 1cqw;
-  padding: 2cqw;
-  border-radius: 3cqw;
+  justify-content: flex-end;
+  gap: 0.2857cqw;
+  padding: 10cqw 2cqw 2.2857cqw;
+  border-radius: 2.8571cqw;
   background: var(--swatch-color);
 }
 
@@ -1202,19 +1220,24 @@
 }
 
 .swatch small {
-  order: 1;
+  order: 0;
   overflow: hidden;
   color: #17191e;
-  font-size: 2.5cqw;
-  font-weight: 800;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 2.8571cqw;
+  font-weight: 700;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .swatch code {
+  order: 1;
   color: #626775;
-  font-family: var(--font-mono);
+  font-family: "JetBrains Mono", monospace;
   font-size: 2cqw;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .swatch:nth-child(4) small,
@@ -1225,7 +1248,8 @@
 .typeSamples {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2.3cqw;
+  gap: 0.8571cqw;
+  margin: 4.2857cqw 0;
 }
 
 .typeSamples > div {
@@ -1234,31 +1258,48 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 1.2cqw;
-  padding: 3.5cqw;
+  gap: 0;
+  padding: 4cqw;
   border-radius: 3.5cqw;
   background: #f4f5f8;
 }
 
 .typeSamples strong {
-  font-size: 3.5cqw;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 3.1429cqw;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.typeSampleMeta {
+  display: flex;
+  align-self: flex-start;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1cqw;
+  text-align: right;
 }
 
 .typeSamples .latinGlyph {
-  font-size: 16cqw;
-  font-weight: 900;
-  line-height: 1;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 12cqw;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
 .typeSamples .hebrewGlyph {
-  font-size: 11cqw;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 12cqw;
   font-weight: 900;
   line-height: 1.1;
 }
 
 .typeSamples span {
-  color: #777b86;
-  font-size: 2.7cqw;
+  color: #16181d;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 2.8571cqw;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .photoCards {
@@ -1271,40 +1312,62 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
+  align-items: center;
   padding: 2cqw;
   border: 1px solid #e2e4ea;
   border-radius: 3.2cqw;
 }
 
-.photoCards img,
-.avatarPreview {
-  width: 100%;
-  aspect-ratio: 1.15;
-  border-radius: 2.1cqw;
+.photoCards article > img,
+.photoCards .avatarPreview {
+  box-sizing: border-box;
+  width: 32.2857cqw;
+  height: 27.1429cqw;
+  border-radius: 2.2857cqw;
+}
+
+.photoCards article > img {
   object-fit: cover;
 }
 
-.avatarPreview svg {
-  width: 62%;
+.photoCards .avatarPreview {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  background: #f4f5f8;
 }
 
-.avatarPreview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.photoCards .avatarPreview img {
+  box-sizing: border-box;
+  width: 15.7143cqw;
+  height: 15.7143cqw;
+  border: 5px solid #fff;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.photoCards article > span,
+.photoCards article > strong {
+  width: 32.2857cqw;
+  text-align: right;
 }
 
 .photoCards article > span {
   margin-top: 2.5cqw;
-  color: #696d79;
-  font-size: 3cqw;
-  font-weight: 700;
+  color: #5f6470;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 2.8571cqw;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .photoCards article > strong {
   margin-top: 1cqw;
-  font-size: 3.3cqw;
-  line-height: 1.5;
+  color: #16181d;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 3.7143cqw;
+  font-weight: 500;
+  line-height: 1.25;
 }
 
 .iconSpec {
@@ -1317,14 +1380,21 @@
   background: #fff0f4;
 }
 
+.iconHeading {
+  margin-bottom: 4.2857cqw;
+  color: #16181d;
+  font-family: "Narkiss Block", sans-serif;
+  font-weight: 900;
+}
+
 .pawGrid {
   position: relative;
   display: grid;
+  box-sizing: border-box;
+  align-self: center;
+  width: 100%;
   aspect-ratio: 1;
-  grid-template-columns: repeat(2, 1fr);
-  align-content: center;
-  justify-items: center;
-  gap: 0.6cqw;
+  place-items: center;
   border: 1px solid #e2e4ea;
   border-radius: 2.5cqw;
   background-color: white;
@@ -1332,12 +1402,12 @@
     linear-gradient(#ffdae4 1px, transparent 1px),
     linear-gradient(90deg, #ffdae4 1px, transparent 1px);
   background-size: 3.4cqw 3.4cqw;
-  color: #17191e;
+  color: #16181d;
 }
 
 .pawGrid img {
-  width: 55%;
-  height: auto;
+  width: 88%;
+  height: 88%;
   z-index: 1;
 }
 
@@ -1403,8 +1473,10 @@
 .catIntro {
   margin: -1cqw 0 3.7cqw;
   color: #696d79;
-  font-size: 3cqw;
-  line-height: 1.6;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 3.1429cqw;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .catGrid {
@@ -1421,8 +1493,17 @@
   justify-items: center;
   gap: 0.8cqw;
   color: #626775;
-  font-size: 3cqw;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 2.7143cqw;
   font-weight: 700;
+  line-height: 1.4;
+}
+
+.catHeading {
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 4.2857cqw;
+  font-weight: 900;
+  line-height: 1.4;
 }
 
 .catPortrait {
@@ -1478,8 +1559,6 @@
 }
 
 .closingLogo,
-.closingLightLine,
-.closingDarkLine,
 .closingCat {
   position: absolute;
   height: auto;
@@ -1489,39 +1568,36 @@
   top: 11.5cqw;
   left: 50%;
   width: 48.6cqw;
-  margin: 0;
-  color: #fd2f79;
-  font-size: 13cqw;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
   transform: translateX(-50%);
+}
+
+.closingCopy {
+  position: absolute;
+  top: 28cqw;
+  left: 50%;
+  display: grid;
+  width: 90%;
+  justify-items: center;
+  gap: 1.4286cqw;
+  transform: translateX(-50%);
+}
+
+.closingLightLine,
+.closingDarkLine {
+  margin: 0;
+  font-family: "Narkiss Block", sans-serif;
+  font-size: 8cqw;
+  font-weight: 900;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .closingLightLine {
-  top: 28cqw;
-  left: 50%;
-  width: 63cqw;
-  margin: 0;
   color: #fff;
-  font-size: 6.6cqw;
-  font-weight: 700;
-  line-height: 1.3;
-  white-space: nowrap;
-  transform: translateX(-50%);
 }
 
 .closingDarkLine {
-  top: 40.1cqw;
-  left: 50%;
-  width: 63cqw;
-  margin: 0;
-  color: #17191e;
-  font-size: 6.6cqw;
-  font-weight: 700;
-  line-height: 1.3;
-  white-space: nowrap;
-  transform: translateX(-50%);
+  color: #16181d;
 }
 
 .closingCat {
