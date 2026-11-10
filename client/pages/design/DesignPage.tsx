@@ -380,10 +380,15 @@ function DesignLanguage() {
       </div>
       <div className={styles.photoCards}>
         <article>
-          <img
-            src="/design/cat-photo.png"
-            alt="חתול ג׳ינג׳י יושב בסמטה בשכונה"
-          />
+          <div className={styles.photoWrapper}>
+            <img
+              src="/design/cat-photo.png"
+              alt="חתול ג׳ינג׳י יושב בסמטה בשכונה"
+            />
+            <div className={styles.photoAvatarBadge}>
+              <CatIllustration kind="mitzi" />
+            </div>
+          </div>
           <span>בכרטיס</span>
           <strong>תמונה אמיתית של החתול</strong>
         </article>

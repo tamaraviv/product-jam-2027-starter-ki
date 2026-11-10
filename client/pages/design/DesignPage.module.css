@@ -1323,11 +1323,24 @@
 }
 
 .photoCards article > img,
+.photoWrapper,
 .photoCards .avatarPreview {
   box-sizing: border-box;
   width: 32.2857cqw;
   height: 27.1429cqw;
   border-radius: 2.2857cqw;
+}
+
+.photoWrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.photoWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .photoCards article > img {
@@ -2079,7 +2092,7 @@
   }
 
   .dayHeader > div:first-child {
-    gap: clamp(0px, calc(0.3cqw - 4px), 0.3cqw);
+    gap: 4px;
   }
 
   .dayHeader p {
@@ -2235,10 +2248,34 @@
   }
 
   .photoCards article > img,
+  .photoWrapper,
   .photoCards .avatarPreview {
     width: 100%;
     height: 20cqw;
     border-radius: 1.2cqw;
+  }
+
+  .photoAvatarBadge {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    width: 124px;
+    height: 124px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #99ddd3;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: grid;
+    place-items: center;
+    z-index: 2;
+  }
+
+  .photoAvatarBadge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .photoCards .avatarPreview img {
@@ -2329,6 +2366,7 @@
 
   .catPortrait {
     width: 132px;
+    height: 132px;
     max-width: none;
   }
 
