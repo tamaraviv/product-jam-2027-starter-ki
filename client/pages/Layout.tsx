@@ -85,7 +85,7 @@ export function Layout() {
             NASA Pictures
           </Link>
           <Link to="/cat-ch" onClick={() => setMenuOpen(false)}>
-            CAT-CH
+            Design
           </Link>
           <a
             href={COURSE_GITHUB}

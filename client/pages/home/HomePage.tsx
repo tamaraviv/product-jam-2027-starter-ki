@@ -73,7 +73,7 @@ export default function HomePage() {
           pictures of space, with Hebrew translations.
         </li>
         <li>
-          <Link to="/cat-ch">CAT-CH</Link> - a design concept for meeting the
+          <Link to="/cat-ch">Design</Link> - a design concept for meeting the
           neighborhood cats and taking care of their needs.
         </li>
         <li>
