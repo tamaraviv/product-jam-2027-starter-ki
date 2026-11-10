@@ -125,33 +125,42 @@ result, and persist the record.
 
 ### `GET /api/nasa/apod`
 
-Fetches a list of random astronomy pictures from NASA's APOD API and augments
-them with existing cached Hebrew translations where available.
+Fetches a page of astronomy pictures, newest first, from NASA's keyless
+`https://science.nasa.gov/wp-json/wp/v2/apod-basic` endpoint and augments them
+with cached Hebrew translations where available.
 
-- **Receives:** Optional query parameter `count` (integer between 1 and 20,
-  default 10). Example: `/api/nasa/apod?count=10`.
-- **Answers:** `200 OK` with an array of APOD objects:
+- **Receives:** Optional query parameters `page` (positive integer, default 1)
+  and `per_page` (integer from 1 to 20, default 20). Example:
+  `/api/nasa/apod?page=1&per_page=20`.
+- **Answers:** `200 OK` with the pictures and paging details:
   ```json
-  [
-    {
-      "date": "2024-05-12",
-      "title": "A Northern Spring Sky",
-      "explanation": "English explanation from NASA...",
-      "media_type": "image",
-      "url": "https://apod.nasa.gov/apod/image/...",
-      "hebrew": {
-        "title": "שמי אביב בצפון",
-        "summary": "הסבר פשוט בעברית...",
-        "tags": ["star", "galaxy"]
+  {
+    "pictures": [
+      {
+        "date": "2024-05-12",
+        "title": "A Northern Spring Sky",
+        "explanation": "Plain-text English explanation from NASA...",
+        "media_type": "image",
+        "url": "https://science.nasa.gov/.../",
+        "hdurl": "https://.../image.jpg",
+        "hebrew": {
+          "title": "שמי אביב בצפון",
+          "summary": "הסבר פשוט בעברית...",
+          "tags": ["star", "galaxy"]
+        }
       }
-    }
-  ]
+    ],
+    "total": 11463,
+    "page": 1,
+    "per_page": 20,
+    "total_pages": 574
+  }
   ```
   _(Note: `hebrew` is `null` if the picture has not been translated yet)._
 - **Errors:**
-  - `400 Bad Request` if `count` is invalid (less than 1 or greater than 20).
-  - `502 Bad Gateway` if NASA's API returns an error, invalid JSON, or times
-    out.
+  - `400 Bad Request` if `page` or `per_page` is invalid.
+  - `502 Bad Gateway` if NASA's API returns an error, invalid JSON, missing
+    pagination data, or times out.
   - `500 Internal Server Error` on unexpected server failure.
 - **Tables:** Reads `nasa_pictures` to attach translations for returned dates.
 
@@ -159,11 +168,14 @@ them with existing cached Hebrew translations where available.
 
 ### `POST /api/nasa/explain`
 
-Generates or retrieves a cached Hebrew explanation and tags for a NASA APOD
-picture. The browser submits **only the picture's date**. The server retrieves
-the authentic title and explanation directly from NASA, queries Gemini via its
-REST API using structured JSON output, validates the response with Zod, saves it
-in `nasa_pictures`, and returns the result.
+Generates or retrieves a cached Hebrew explanation and tags for a NASA picture.
+The browser submits **only the picture's date**. The server retrieves the
+authentic title and explanation from NASA's date-specific endpoint using the
+date's `YYMMDD` slug (for example, `2015-03-14` becomes `150314`), cleans the
+HTML explanation into plain text, and calls the Gemini 3.6 Flash REST API with
+structured JSON output. It validates the Hebrew title, 2–3 sentence summary, and
+1–5 tags with Zod, saves the result in `nasa_pictures`, and returns the cached
+result on later requests.
 
 - **Receives:**
   ```json
@@ -182,13 +194,27 @@ in `nasa_pictures`, and returns the result.
   }
   ```
 - **Errors:**
-  - `400 Bad Request` if `date` is missing, not a valid `YYYY-MM-DD` string, or
-    refers to a future date.
-  - `502 Bad Gateway` if NASA APOD API fails for that date, or Gemini REST API
+  - `400 Bad Request` if `date` is missing or not a valid `YYYY-MM-DD` string.
+  - `404 Not Found` if NASA has no picture for the requested date.
+  - `502 Bad Gateway` if NASA's endpoint fails for that date, or Gemini REST API
     fails or produces an unparseable response.
   - `500 Internal Server Error` if database read/write fails.
 - **Tables:** Reads from `nasa_pictures`. If not cached, writes the new
   explanation into `nasa_pictures`.
+
+### What changed and why
+
+The app now uses NASA's keyless `apod-basic` WordPress API instead of the
+unreliable `api.nasa.gov/planetary/apod` endpoint. The list is fetched through
+`page` and `per_page`, newest first, and the upstream `X-WP-Total` header powers
+the page count in the UI. A date lookup uses the NASA `YYMMDD` path and returns
+`404` when that date has no picture. NASA's `explanation` is HTML, so the server
+strips markup and decodes entities before displaying it or passing it to Gemini.
+The client uses `hdurl` for the image and treats `url` as the NASA article link.
+This also removes the need to configure or maintain a NASA API key; only Gemini
+still needs a server-side key. NASA requests time out after 10 seconds, and NASA
+errors are translated into a clear message from this server rather than exposing
+NASA's response body.
 
 ---
 

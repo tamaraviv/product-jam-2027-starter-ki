@@ -67,5 +67,39 @@ describe("NASA schemas", () => {
       };
       expect(geminiExplanationSchema.safeParse(emptyTitle).success).toBe(false);
     });
+
+    it("requires a summary of 2 or 3 sentences", () => {
+      const base = {
+        hebrewTitle: "הירח",
+        tags: ["moon"],
+      };
+
+      expect(
+        geminiExplanationSchema.safeParse({
+          ...base,
+          hebrewSummary: "הירח מקיף את כדור הארץ.",
+        }).success,
+      ).toBe(false);
+      expect(
+        geminiExplanationSchema.safeParse({
+          ...base,
+          hebrewSummary: "הירח מקיף את כדור הארץ. הוא מחזיר אלינו את אור השמש.",
+        }).success,
+      ).toBe(true);
+      expect(
+        geminiExplanationSchema.safeParse({
+          ...base,
+          hebrewSummary:
+            "הירח מקיף את כדור הארץ. הוא מחזיר אלינו את אור השמש. לכן רואים אותו בלילה.",
+        }).success,
+      ).toBe(true);
+      expect(
+        geminiExplanationSchema.safeParse({
+          ...base,
+          hebrewSummary:
+            "הירח מקיף את כדור הארץ. הוא מחזיר אלינו את אור השמש. לכן רואים אותו בלילה. הוא יפה.",
+        }).success,
+      ).toBe(false);
+    });
   });
 });

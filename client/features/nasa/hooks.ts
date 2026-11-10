@@ -1,5 +1,5 @@
 import type {
-  ApodCard,
+  ApodPage,
   ExplainRequestInput,
   ExplainResponse,
 } from "@shared/schemas/nasa";
@@ -9,31 +9,25 @@ import { api } from "../../lib/api";
 
 export const nasaKeys = {
   all: ["nasa"] as const,
-  apod: (count: number, seed: number) => ["nasa", "apod", count, seed] as const,
+  apod: (perPage: number, page: number) =>
+    ["nasa", "apod", perPage, page] as const,
 };
 
-/** Fetches random NASA APOD pictures. Returns a shuffle() to load a fresh random set. */
-export function useNasaPictures(count = 20) {
-  const [seed, setSeed] = useState(() => Date.now());
+/** Fetches a newest-first page of NASA pictures. */
+export function useNasaPictures(perPage = 20) {
+  const [page, setPage] = useState(1);
 
   const query = useQuery({
-    queryKey: nasaKeys.apod(count, seed),
+    queryKey: nasaKeys.apod(perPage, page),
     queryFn: () =>
-      api<ApodCard[]>(`/api/nasa/apod?count=${count}&refresh=${seed}`),
-    // Every seed value is a unique cache entry — no stale concern needed
-    staleTime: Infinity,
+      api<ApodPage>(`/api/nasa/apod?page=${page}&per_page=${perPage}`),
   });
 
-  /** Calling shuffle() bumps the seed → new query key → fresh NASA API call. */
-  function shuffle() {
-    setSeed((current) => current + 1);
-  }
-
-  return { ...query, seed, shuffle };
+  return { ...query, page, setPage };
 }
 
 /** Requests Gemini to explain a picture in Hebrew and saves it to the database cache. */
-export function useExplainPicture(count: number, seed: number) {
+export function useExplainPicture(perPage: number, page: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -44,22 +38,25 @@ export function useExplainPicture(count: number, seed: number) {
       }),
     onSuccess: (result) => {
       // Optimistically update the picture in the local React Query cache
-      queryClient.setQueryData<ApodCard[]>(
-        nasaKeys.apod(count, seed),
+      queryClient.setQueryData<ApodPage>(
+        nasaKeys.apod(perPage, page),
         (old) => {
           if (!old) return old;
-          return old.map((card) =>
-            card.date === result.date
-              ? {
-                  ...card,
-                  hebrew: {
-                    title: result.hebrew_title,
-                    summary: result.hebrew_summary,
-                    tags: result.tags,
-                  },
-                }
-              : card,
-          );
+          return {
+            ...old,
+            pictures: old.pictures.map((card) =>
+              card.date === result.date
+                ? {
+                    ...card,
+                    hebrew: {
+                      title: result.hebrew_title,
+                      summary: result.hebrew_summary,
+                      tags: result.tags,
+                    },
+                  }
+                : card,
+            ),
+          };
         },
       );
     },

@@ -22,20 +22,29 @@ function ApodItemCard({
   return (
     <Card variant="raised" padding="none" className={styles.card}>
       <div className={styles.mediaWrapper}>
-        {item.media_type === "video" ? (
-          <iframe
-            src={item.url}
-            title={item.title}
-            className={styles.videoIframe}
-            allowFullScreen
-          />
+        {item.hdurl ? (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.imageLink}
+          >
+            <img
+              src={item.hdurl}
+              alt={item.title}
+              className={styles.image}
+              loading="lazy"
+            />
+          </a>
         ) : (
-          <img
-            src={item.url}
-            alt={item.title}
-            className={styles.image}
-            loading="lazy"
-          />
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.articleLink}
+          >
+            View NASA article
+          </a>
         )}
       </div>
 
@@ -105,15 +114,17 @@ function ApodItemCard({
 
 export default function NasaPage() {
   const {
-    data: pictures,
+    data: pageData,
     isLoading,
     error,
     isFetching,
-    seed,
-    shuffle,
+    page,
+    setPage,
+    refetch,
   } = useNasaPictures(COUNT);
+  const pictures = pageData?.pictures;
 
-  const explain = useExplainPicture(COUNT, seed);
+  const explain = useExplainPicture(COUNT, page);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
 
@@ -147,15 +158,6 @@ export default function NasaPage() {
             explanations
           </p>
         </div>
-
-        <Button
-          variant="secondary"
-          size="sm"
-          loading={isFetching}
-          onClick={shuffle}
-        >
-          Shuffle Pictures
-        </Button>
       </header>
 
       {isLoading ? (
@@ -173,7 +175,7 @@ export default function NasaPage() {
               ? error.message
               : "NASA service could not be reached."}
           </p>
-          <Button variant="primary" onClick={shuffle}>
+          <Button variant="primary" onClick={() => refetch()}>
             Try Again
           </Button>
         </Card>
@@ -192,6 +194,27 @@ export default function NasaPage() {
               explainError={cardErrors[item.date] ?? null}
             />
           ))}
+          <nav className={styles.pagination} aria-label="Picture pages">
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage((current) => current - 1)}
+            >
+              Newer pictures
+            </Button>
+            <span className={styles.pageNumber}>
+              Page {page} of {pageData?.total_pages ?? 1}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={isFetching || page >= (pageData?.total_pages ?? 1)}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Older pictures
+            </Button>
+          </nav>
         </div>
       )}
     </main>

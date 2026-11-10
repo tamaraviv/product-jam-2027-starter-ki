@@ -50,17 +50,16 @@ to every visitor's browser.
 `.env` is already in `.gitignore`, so git will not commit it. Leave it that way,
 and send the values to your teammates some other way.
 
-## Add NASA and Gemini keys
+## Add the Gemini key
 
-The space-pictures page also needs two private server keys. Add them to the
-private section of `.env`:
+The space-pictures page uses NASA's public `apod-basic` endpoint, which does not
+need a key. Add the Gemini key to the private section of `.env`:
 
 | Name             | Get it from                                            |
 | ---------------- | ------------------------------------------------------ |
-| `NASA_API_KEY`   | [NASA API signup](https://api.nasa.gov/)               |
 | `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/apikey) |
 
-Do not prefix these with `VITE_`; the browser must never receive either key.
+Do not prefix this with `VITE_`; the browser must never receive the key.
 
 ## Create the tables
 

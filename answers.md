@@ -182,34 +182,12 @@ the system).
 
 ## 5. When NASA fails
 
-On your computer, change `NASA_API_KEY` in your `.env` to a wrong key and
-restart `npm run dev`. Screenshot what your page shows, and what your server
-answered in the **Network** tab.
-
-Which status code did your server answer, and why not the one NASA answered? Put
-the right key back when you are done.
-
-**Answer:** ![NASA Failure](screenshots/q5-nasa-fail.png)
-![NASA Failure](screenshots/q5-nasa-fail.png)
-
-**Status code answered:** Our server answers with **`502 Bad Gateway`**
-(`{ error: { code: "nasa_error", message: "NASA's service returned an error. Please try again later." } }`).
-
-**Why not the status code NASA answered:** NASA answered with an upstream
-authentication error (such as `403 Forbidden` or `400 Bad Request` for an
-invalid API key). If our server forwarded NASA's `403` to the browser, the
-frontend would falsely interpret it as the logged-in user having inadequate
-permissions on _our_ web app. In standard HTTP architecture, `502 Bad Gateway`
-is the correct semantic code indicating that our server, acting as a
-gateway/proxy, received an invalid or failing response from an upstream server
-(NASA). Furthermore, masking raw upstream errors prevents exposing internal
-credentials, NASA rate limits, or vendor stack traces to client users.
-
-**Status code answered:**
-Our server answers with **`502 Bad Gateway`** (`{ error: { code: "nasa_error", message: "NASA's service returned an error. Please try again later." } }`).
-
-**Why not the status code NASA answered:**
-NASA answered with an upstream authentication error (such as `403 Forbidden` or `400 Bad Request` for an invalid API key). If our server forwarded NASA's `403` to the browser, the frontend would falsely interpret it as the logged-in user having inadequate permissions on *our* web app. In standard HTTP architecture, `502 Bad Gateway` is the correct semantic code indicating that our server, acting as a gateway/proxy, received an invalid or failing response from an upstream server (NASA). Furthermore, masking raw upstream errors prevents exposing internal credentials, NASA rate limits, or vendor stack traces to client users.
+NASA's `apod-basic` endpoint does not require an API key. Verify the missing
+picture behavior by requesting an unavailable date from the explain endpoint.
+The server returns **`404 Not Found`** for NASA's date-specific `404`, rather
+than treating it as a gateway failure. Other errors from NASA are returned as
+**`502 Bad Gateway`**, since our server is acting as a gateway and did not
+receive a successful upstream response.
 
 ## 6. Who wrote the text?
 
@@ -253,15 +231,30 @@ every other user visiting that picture.
   content moderation filters, or LLM safety classifiers can catch text-level
   jailbreaks.
 
-**Why the server gets text directly from NASA:**
-The browser environment is completely untrusted. Since explanations are cached in the shared database table (`nasa_pictures`) for all users (to avoid paying twice for the same APOD picture), accepting picture text from the browser would allow any user to submit fabricated text, offensive statements, or prompt injection exploits. That malicious content would be permanently saved in our database cache and served to every other user visiting that picture.
+**Why the server gets text directly from NASA:** The browser environment is
+completely untrusted. Since explanations are cached in the shared database table
+(`nasa_pictures`) for all users (to avoid paying twice for the same APOD
+picture), accepting picture text from the browser would allow any user to submit
+fabricated text, offensive statements, or prompt injection exploits. That
+malicious content would be permanently saved in our database cache and served to
+every other user visiting that picture.
 
 **Prompt injection defense analysis:**
+
 - **What protects our app:**
-  1. **Zod Schema Validation:** In `shared/schemas/nasa.ts`, `tags` is defined with `z.array(z.enum(ALLOWED_NASA_TAGS))`. Because `"hacked"` is not in `ALLOWED_NASA_TAGS`, Zod fails validation, our server catches the error, aborts database insertion, and returns `502 gemini_schema_mismatch`.
-  2. **Gemini Structured Output (`response_schema`):** The Gemini REST API call enforces strict enum constraints on `tags` at model decoding time.
-- **What doesn't protect our app:**
-  Free-text fields (`hebrewTitle` and `hebrewSummary`) are strings without strict semantic guardrails. If a prompt injection targets the text body (e.g. "make the summary say something offensive"), the LLM could still be persuaded to write unwanted text in the summary, which would pass Zod's `z.string().min(10)` check. Only human review, content moderation filters, or LLM safety classifiers can catch text-level jailbreaks.
+  1. **Zod Schema Validation:** In `shared/schemas/nasa.ts`, `tags` is defined
+     with `z.array(z.enum(ALLOWED_NASA_TAGS))`. Because `"hacked"` is not in
+     `ALLOWED_NASA_TAGS`, Zod fails validation, our server catches the error,
+     aborts database insertion, and returns `502 gemini_schema_mismatch`.
+  2. **Gemini Structured Output (`response_schema`):** The Gemini REST API call
+     enforces strict enum constraints on `tags` at model decoding time.
+- **What doesn't protect our app:** Free-text fields (`hebrewTitle` and
+  `hebrewSummary`) are strings without strict semantic guardrails. If a prompt
+  injection targets the text body (e.g. "make the summary say something
+  offensive"), the LLM could still be persuaded to write unwanted text in the
+  summary, which would pass Zod's `z.string().min(10)` check. Only human review,
+  content moderation filters, or LLM safety classifiers can catch text-level
+  jailbreaks.
 
 ## 7. When the AI was wrong
 

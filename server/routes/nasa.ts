@@ -6,31 +6,44 @@ import {
 import { Hono } from "hono";
 import type { AppEnv } from "../env";
 import { fail, validate } from "../lib/errors";
+import {
+  cleanApodExplanation,
+  isRawApodItem,
+  toApodDateSlug,
+} from "../lib/nasa";
 import { createAdminClient } from "../lib/supabase";
 
-export const nasa = new Hono<AppEnv>()
-  // GET /api/nasa/apod - fetches random pictures from NASA APOD
-  .get("/apod", async (c) => {
-    const rawCount = c.req.query("count");
-    const count = Math.min(
-      Math.max(parseInt(rawCount ?? "20", 10) || 20, 1),
-      20,
-    );
+const NASA_REQUEST_TIMEOUT_MS = 10_000;
+const GEMINI_REQUEST_TIMEOUT_MS = 60_000;
 
-    if (!c.env.NASA_API_KEY) {
+export const nasa = new Hono<AppEnv>()
+  // GET /api/nasa/apod - fetches newest pictures from NASA
+  .get("/apod", async (c) => {
+    const rawPage = c.req.query("page") ?? "1";
+    const rawPerPage = c.req.query("per_page") ?? "20";
+    const page = Number(rawPage);
+    const perPage = Number(rawPerPage);
+
+    if (!Number.isInteger(page) || page < 1) {
+      return fail(c, 400, "invalid_page", "Page must be a positive integer.");
+    }
+    if (!Number.isInteger(perPage) || perPage < 1 || perPage > 20) {
       return fail(
         c,
-        500,
-        "missing_config",
-        "NASA API key is not configured on the server.",
+        400,
+        "invalid_per_page",
+        "per_page must be an integer between 1 and 20.",
       );
     }
 
     let nasaResponse: Response;
     try {
       nasaResponse = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(c.env.NASA_API_KEY)}&count=${count}`,
-        { cache: "no-store" },
+        `https://science.nasa.gov/wp-json/wp/v2/apod-basic?page=${page}&per_page=${perPage}`,
+        {
+          cache: "no-store",
+          signal: AbortSignal.timeout(NASA_REQUEST_TIMEOUT_MS),
+        },
       );
     } catch (err) {
       console.error("NASA APOD network error:", err);
@@ -53,7 +66,7 @@ export const nasa = new Hono<AppEnv>()
         c,
         502,
         "nasa_error",
-        `NASA returned ${nasaResponse.status}: ${nasaErrText.slice(0, 200)}`,
+        "NASA's picture service is temporarily unavailable. Please try again later.",
       );
     }
 
@@ -69,18 +82,15 @@ export const nasa = new Hono<AppEnv>()
       );
     }
 
-    type RawApodItem = {
-      date: string;
-      title: string;
-      explanation: string;
-      url: string;
-      media_type?: string;
-      hdurl?: string;
-    };
-
-    const items: RawApodItem[] = Array.isArray(rawData)
-      ? rawData
-      : [rawData as RawApodItem];
+    if (!Array.isArray(rawData) || !rawData.every(isRawApodItem)) {
+      return fail(
+        c,
+        502,
+        "nasa_invalid_response",
+        "NASA returned picture data in an unexpected format.",
+      );
+    }
+    const items = rawData;
 
     if (
       items.length > 1 &&
@@ -99,6 +109,18 @@ export const nasa = new Hono<AppEnv>()
         502,
         "nasa_repeated_content",
         "NASA returned the same picture and description for every result. Please try again later.",
+      );
+    }
+
+    const rawTotal = nasaResponse.headers.get("X-WP-Total");
+    const total = rawTotal === null ? Number.NaN : Number(rawTotal);
+    if (!Number.isInteger(total) || total < 0) {
+      console.error("NASA APOD response has an invalid X-WP-Total header.");
+      return fail(
+        c,
+        502,
+        "nasa_invalid_response",
+        "NASA returned invalid pagination information.",
       );
     }
 
@@ -141,29 +163,39 @@ export const nasa = new Hono<AppEnv>()
       }
     }
 
-    const result = items.map((item) => ({
+    const pictures = items.map((item) => ({
       date: item.date,
       title: item.title,
-      explanation: item.explanation,
+      explanation: cleanApodExplanation(item.explanation),
       url: item.url,
-      media_type: item.media_type || "image",
+      media_type: "image",
       hdurl: item.hdurl || null,
       hebrew: cachedMap.get(item.date) ?? null,
     }));
 
-    return c.json(result, 200, { "Cache-Control": "no-store" });
+    return c.json(
+      {
+        pictures,
+        total,
+        page,
+        per_page: perPage,
+        total_pages: Math.ceil(total / perPage),
+      },
+      200,
+      { "Cache-Control": "no-store" },
+    );
   })
 
   // POST /api/nasa/explain - translates and explains an APOD picture in Hebrew
   .post("/explain", validate("json", explainRequestSchema), async (c) => {
     const { date } = c.req.valid("json");
 
-    if (!c.env.NASA_API_KEY || !c.env.GEMINI_API_KEY) {
+    if (!c.env.GEMINI_API_KEY) {
       return fail(
         c,
         500,
         "missing_config",
-        "Server API keys (NASA or Gemini) are not configured.",
+        "Gemini API key is not configured.",
       );
     }
 
@@ -203,8 +235,11 @@ export const nasa = new Hono<AppEnv>()
     let nasaRes: Response;
     try {
       nasaRes = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(c.env.NASA_API_KEY)}&date=${encodeURIComponent(date)}`,
-        { cache: "no-store" },
+        `https://science.nasa.gov/wp-json/wp/v2/apod-basic/${toApodDateSlug(date)}`,
+        {
+          cache: "no-store",
+          signal: AbortSignal.timeout(NASA_REQUEST_TIMEOUT_MS),
+        },
       );
     } catch (err) {
       console.error("NASA APOD date fetch error:", err);
@@ -218,6 +253,9 @@ export const nasa = new Hono<AppEnv>()
 
     if (!nasaRes.ok) {
       console.error("NASA date error:", nasaRes.status, await nasaRes.text());
+      if (nasaRes.status === 404) {
+        return fail(c, 404, "not_found", "NASA has no picture for this date.");
+      }
       return fail(
         c,
         502,
@@ -226,12 +264,7 @@ export const nasa = new Hono<AppEnv>()
       );
     }
 
-    let apodData: {
-      title?: string;
-      explanation?: string;
-      url?: string;
-      media_type?: string;
-    };
+    let apodData: unknown;
     try {
       apodData = await nasaRes.json();
     } catch {
@@ -243,16 +276,25 @@ export const nasa = new Hono<AppEnv>()
       );
     }
 
-    const englishTitle = apodData.title ?? "Astronomy Picture";
-    const englishExplanation = apodData.explanation ?? "";
-    const imageUrl = apodData.url ?? "";
-    const mediaType = apodData.media_type ?? "image";
+    if (!isRawApodItem(apodData)) {
+      return fail(
+        c,
+        502,
+        "nasa_invalid_response",
+        "NASA returned picture data in an unexpected format.",
+      );
+    }
+
+    const englishTitle = apodData.title;
+    const englishExplanation = cleanApodExplanation(apodData.explanation);
+    const imageUrl = apodData.hdurl ?? "";
+    const mediaType = "image";
 
     // Call Gemini REST API using fetch with structured JSON output
     const prompt = `You are an astronomy educator writing for children.
 Read this NASA Astronomy Picture of the Day entry and generate:
 1. "hebrewTitle": A clear, engaging Hebrew title.
-2. "hebrewSummary": A simple explanation of 2 to 3 sentences in Hebrew, easy enough for a 10-year-old child to understand.
+2. "hebrewSummary": A simple explanation of exactly 2 or 3 complete sentences in Hebrew, easy enough for a 10-year-old child to understand.
 3. "tags": An array of 1 to 5 tags chosen strictly from this allowed list: ${ALLOWED_NASA_TAGS.join(", ")}.
 
 Picture Title: ${englishTitle}
@@ -270,8 +312,15 @@ Picture Explanation: ${englishExplanation}`;
         responseSchema: {
           type: "OBJECT",
           properties: {
-            hebrewTitle: { type: "STRING" },
-            hebrewSummary: { type: "STRING" },
+            hebrewTitle: {
+              type: "STRING",
+              description: "A clear, engaging title in Hebrew.",
+            },
+            hebrewSummary: {
+              type: "STRING",
+              description:
+                "Exactly 2 or 3 simple, complete sentences in Hebrew for a 10-year-old.",
+            },
             tags: {
               type: "ARRAY",
               items: {
@@ -288,23 +337,38 @@ Picture Explanation: ${englishExplanation}`;
     let geminiRes: Response | undefined;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        // Use Google's current stable Flash model for structured text output.
+        // Use a supported stable Flash model for structured text output.
         geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(c.env.GEMINI_API_KEY)}`,
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": c.env.GEMINI_API_KEY,
+            },
             body: JSON.stringify(geminiBody),
+            signal: AbortSignal.timeout(GEMINI_REQUEST_TIMEOUT_MS),
           },
         );
       } catch (err) {
-        console.error("Gemini network error:", err);
-        return fail(
-          c,
-          502,
-          "gemini_unavailable",
-          "Could not reach Gemini AI service.",
-        );
+        console.error(`Gemini network error on attempt ${attempt + 1}:`, err);
+        if (attempt === 2) {
+          const timedOut =
+            err instanceof Error &&
+            (err.name === "TimeoutError" || err.name === "AbortError");
+          return fail(
+            c,
+            502,
+            timedOut ? "gemini_timeout" : "gemini_unavailable",
+            timedOut
+              ? "Gemini took too long to respond. Please try again."
+              : "Could not connect to Gemini. Please try again.",
+          );
+        }
+
+        const backoffMs = 1000 * 2 ** attempt + Math.random() * 250;
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
       }
 
       const retryable =

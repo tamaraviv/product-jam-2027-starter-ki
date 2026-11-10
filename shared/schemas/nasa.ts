@@ -25,13 +25,20 @@ export const explainRequestSchema = z.object({
 
 export type ExplainRequestInput = z.infer<typeof explainRequestSchema>;
 
+function hasTwoOrThreeSentences(summary: string): boolean {
+  const sentenceCount =
+    summary.match(/[.!?؟](?=["'״׳”’)]*(?:\s|$))/g)?.length ?? 0;
+  return sentenceCount >= 2 && sentenceCount <= 3;
+}
+
 /** Schema for validating structured Gemini LLM output. */
 export const geminiExplanationSchema = z.object({
   hebrewTitle: z.string().trim().min(1, "Title cannot be empty"),
   hebrewSummary: z
     .string()
     .trim()
-    .min(10, "Summary must be at least 10 characters"),
+    .min(10, "Summary must be at least 10 characters")
+    .refine(hasTwoOrThreeSentences, "Summary must contain 2 to 3 sentences"),
   tags: z
     .array(z.enum(ALLOWED_NASA_TAGS))
     .min(1, "Must contain at least 1 tag")
@@ -59,6 +66,17 @@ export const apodCardSchema = z.object({
 
 export type ApodCard = z.infer<typeof apodCardSchema>;
 
+/** A page of newest-first APOD pictures and the upstream pagination totals. */
+export const apodPageSchema = z.object({
+  pictures: z.array(apodCardSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  per_page: z.number().int().positive(),
+  total_pages: z.number().int().nonnegative(),
+});
+
+export type ApodPage = z.infer<typeof apodPageSchema>;
+
 /** Response returned when an explanation is generated or fetched from cache. */
 export const explainResponseSchema = z.object({
   date: z.string(),
@@ -69,4 +87,3 @@ export const explainResponseSchema = z.object({
 });
 
 export type ExplainResponse = z.infer<typeof explainResponseSchema>;
-
