@@ -54,23 +54,32 @@ export default function HomePage() {
         </>
       ) : null}
 
-      <h2>Lorem Ipsum</h2>
+      <h2>What You Can Find Here</h2>
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus
-        sit amet nunc nec vehicula. Fusce ornare nec nulla non imperdiet. Fusce
-        vel sodales justo. Sed efficitur arcu lorem, at iaculis odio ultricies
-        et. Duis rutrum urna nec elit bibendum, sed hendrerit nulla posuere.
-        Vestibulum vestibulum, ante non tincidunt posuere, dui arcu lacinia
-        nisl, nec rhoncus massa arcu ac ipsum. Nam congue interdum tortor, eu
-        dignissim massa scelerisque vitae.
+        This site is our Product Jam playground: a collection of small projects
+        built on a React client, a Hono server running on Cloudflare Workers,
+        and Supabase for login and data. Each project explores a different idea,
+        from a classic game to live space pictures to a product design for
+        caring for street cats. Log in to save your games and manage your own
+        events.
       </p>
       <ul>
         <li>
-          Aliquam maximus tellus sed lacus venenatis, ac cursus eros mollis.
+          <Link to="/tic-tac-toe">Tic-Tac-Toe</Link> - play a game and keep a
+          history of your saved games.
         </li>
-        <li>In id ante sed sem pharetra molestie et vitae arcu.</li>
-        <li>Cras pharetra turpis at pretium elementum.</li>
-        <li>Donec ultrices felis vel lectus auctor iaculis.</li>
+        <li>
+          <Link to="/nasa">NASA Space Pictures</Link> - browse NASA&apos;s
+          pictures of space, with Hebrew translations.
+        </li>
+        <li>
+          <Link to="/cat-ch">CAT-CH</Link> - a design concept for meeting the
+          neighborhood cats and taking care of their needs.
+        </li>
+        <li>
+          <Link to="/demos">Demos</Link> - examples of the building blocks:
+          page elements, charts and shared components.
+        </li>
       </ul>
     </main>
   );
