@@ -348,7 +348,7 @@ function DesignLanguage() {
       </p>
       <div className={styles.brandColor}>
         <strong>מותג</strong>
-        <code>#FD2F79</code>
+        <code dir="ltr">#FD2F79</code>
       </div>
       <div className={styles.palette}>
         {palette.map(([color, label]) => (
@@ -358,7 +358,10 @@ function DesignLanguage() {
             style={{ backgroundColor: color }}
           >
             <small>{label}</small>
-            <code>{color.toUpperCase()}</code>
+            <code dir="ltr">
+              <span className={styles.swatchHash}>#</span>
+              {color.slice(1).toUpperCase()}
+            </code>
           </div>
         ))}
       </div>
@@ -381,10 +384,16 @@ function DesignLanguage() {
       <div className={styles.photoCards}>
         <article>
           <div className={styles.photoWrapper}>
-            <img
-              src="/design/cat-photo.png"
-              alt="חתול ג׳ינג׳י יושב בסמטה בשכונה"
-            />
+            <picture>
+              <source
+                media="(min-width: 900px)"
+                srcSet="/design/cat-photo-wide.jpg"
+              />
+              <img
+                src="/design/cat-photo.png"
+                alt="חתול ג׳ינג׳י יושב בסמטה בשכונה"
+              />
+            </picture>
             <div className={styles.photoAvatarBadge}>
               <CatIllustration kind="mitzi" />
             </div>
