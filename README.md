@@ -95,3 +95,4 @@ Before handing the app over, hide the gallery and the demos by setting
 5. [Adding a feature](docs/05-adding-a-feature.md) - the pattern to copy
 
 hi im aviv
+hi im rotem
